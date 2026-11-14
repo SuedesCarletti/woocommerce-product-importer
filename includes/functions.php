@@ -4,6 +4,30 @@ if (!defined('ABSPATH')) {
     exit; // Exit if accessed directly
 }
 
+/**
+ * CSRF: toda ação POST do painel exige administrador + nonce.
+ */
+function woo_importador_post_ok() {
+    if (!current_user_can('manage_options')) {
+        return false;
+    }
+    $nonce = isset($_POST['_woo_imp_nonce']) ? sanitize_text_field(wp_unslash($_POST['_woo_imp_nonce'])) : '';
+    if (!wp_verify_nonce($nonce, 'woo_importador_action')) {
+        echo '<div class="notice notice-error"><p>Sessão expirada ou requisição inválida. Recarregue a página.</p></div>';
+        return false;
+    }
+    return true;
+}
+
+function woo_importador_nonce_field() {
+    wp_nonce_field('woo_importador_action', '_woo_imp_nonce');
+}
+
+function woo_importador_nonce_html() {
+    return wp_nonce_field('woo_importador_action', '_woo_imp_nonce', true, false);
+}
+
+
 // FUNÇÕES UNIFICADAS E OTIMIZADA
 
 // FUNÇÕES RAILWAY (ESTOQUE)

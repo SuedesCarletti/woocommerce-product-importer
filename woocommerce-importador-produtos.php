@@ -1,9 +1,11 @@
 <?php
 /*
 Plugin Name: WooCommerce Importador Estoque & Preços
+Plugin URI: https://github.com/SuedesCarletti/woocommerce-product-importer
 Description: Atualiza estoque via Railway/Sankhya e preços via Precode - Versão Unificada
 Version: 2.1.0
 Author: Suedes Carletti
+License: Todos os direitos reservados / All rights reserved
 Text Domain: woo-importador
 */
 

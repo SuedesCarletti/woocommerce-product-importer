@@ -60,7 +60,7 @@ function woo_importador_pagina_principal() {
     echo '<div style="margin: 20px 0;">';
     
     // Form para sincronização padrão (Lote de 50) ou Reset
-    echo '<form method="post" style="display: inline; margin-right: 10px;">';
+    echo '<form method="post" style="display: inline; margin-right: 10px;">'; woo_importador_nonce_field();
     echo '<input type="hidden" name="sync_limit" value="50">'; // Limite padrão 50 (incremental)
     
     if ($restantes > 0) {
@@ -74,8 +74,8 @@ function woo_importador_pagina_principal() {
     echo '<input type="submit" name="resetar_progresso" class="button button-secondary" value="Resetar Progresso" onclick="return confirm(\'Tem certeza que deseja resetar o progresso?\');">';
     echo '</form>';
     
-    // NOVO BOTÃO: Sincronização de Lote Grande (300) - Simula o Full Sync solicitado
-    echo '<form method="post" style="display: inline;">';
+    // Sincronização de Lote Grande (300) - Simula o Full Sync solicitado
+    echo '<form method="post" style="display: inline;">'; woo_importador_nonce_field();
     echo '<input type="hidden" name="sync_limit" value="300">'; // Limite grande para full sync manual
     echo '<input type="submit" name="atualizar_produtos" class="button button-primary button-large" style="background-color: #d63638; border-color: #c72c2e; margin-left: 20px;" value="Sincronizar TUDO (Lote Grande 300 produtos)">';
     echo '</form>';
@@ -91,7 +91,7 @@ function woo_importador_pagina_principal() {
     echo '</div>';
     
     // Processar ações
-    if (isset($_POST['atualizar_produtos'])) {
+    if (isset($_POST['atualizar_produtos']) && woo_importador_post_ok()) {
         // Captura o limite da requisição POST (50 ou 300)
         $sync_limit = intval($_POST['sync_limit'] ?? 50);
 
@@ -104,7 +104,7 @@ function woo_importador_pagina_principal() {
         }
     }
     
-    if (isset($_POST['resetar_progresso'])) {
+    if (isset($_POST['resetar_progresso']) && woo_importador_post_ok()) {
         update_option('woo_importador_offset', 0);
         echo '<div class="notice notice-success"><p>Progresso resetado!</p></div>';
     }
@@ -116,7 +116,7 @@ function woo_importador_pagina_config() {
     echo '<h1>Configurações</h1>';
     
     // Salvar configurações
-    if (isset($_POST['salvar_config'])) {
+    if (isset($_POST['salvar_config']) && woo_importador_post_ok()) {
         update_option('woo_importador_usar_railway', isset($_POST['usar_railway']) ? '1' : '0');
         update_option('woo_importador_railway_url', sanitize_url($_POST['railway_url']));
         update_option('woo_importador_railway_token', sanitize_text_field($_POST['railway_token']));
@@ -128,7 +128,7 @@ function woo_importador_pagina_config() {
     $railway_url = get_option('woo_importador_railway_url', '');
     $railway_token = get_option('woo_importador_railway_token', '');
     
-    echo '<form method="post">';
+    echo '<form method="post">'; woo_importador_nonce_field();
     echo '<table class="form-table">';
     
     // Configurações Railway
@@ -224,7 +224,7 @@ function woo_importador_pagina_teste() {
     echo '<div class="wrap">';
     echo '<h1>Teste Individual de Produto</h1>';
     
-    if (isset($_POST['testar_produto'])) {
+    if (isset($_POST['testar_produto']) && woo_importador_post_ok()) {
         $sku = sanitize_text_field($_POST['sku_teste']);
         if (!empty($sku)) {
             woo_importador_testar_produto_simples($sku);
@@ -235,7 +235,7 @@ function woo_importador_pagina_teste() {
     echo '<h3>Teste do Fluxo</h3>';
     echo '<p>Este teste verifica: <strong>WordPress → Railway → Sankhya</strong></p>';
     
-    echo '<form method="post" style="margin: 20px 0;">';
+    echo '<form method="post" style="margin: 20px 0;">'; woo_importador_nonce_field();
     echo '<table class="form-table">';
     echo '<tr>';
     echo '<th scope="row">SKU para Teste</th>';
@@ -353,7 +353,7 @@ function woo_importador_pagina_ficha_tecnica() {
     $restantes = max(0, intval($total_produtos) - $processados);
 
     // Processar ações
-    if (isset($_POST['sincronizar_lote_ficha'])) {
+    if (isset($_POST['sincronizar_lote_ficha']) && woo_importador_post_ok()) {
         $limite = intval($_POST['ficha_limite'] ?? 20);
         if (function_exists('woo_importador_sincronizar_ficha_tecnica_lote')) {
             $sucessos = woo_importador_sincronizar_ficha_tecnica_lote($limite);
@@ -363,7 +363,7 @@ function woo_importador_pagina_ficha_tecnica() {
         }
     }
 
-    if (isset($_POST['resetar_progresso_ficha'])) {
+    if (isset($_POST['resetar_progresso_ficha']) && woo_importador_post_ok()) {
         update_option('woo_importador_ficha_offset', 0);
         echo '<div class="notice notice-success"><p>Progresso da ficha técnica resetado!</p></div>';
     }
@@ -377,14 +377,14 @@ function woo_importador_pagina_ficha_tecnica() {
     echo '</table>';
     echo '</div>';
 
-    echo '<form method="post" style="margin: 20px 0;">';
+    echo '<form method="post" style="margin: 20px 0;">'; woo_importador_nonce_field();
     echo '<input type="hidden" name="ficha_limite" value="20">';
     echo '<input type="submit" name="sincronizar_lote_ficha" class="button button-primary button-large" value="Sincronizar Próximo Lote (20 produtos)" style="margin-right: 10px;">';
     echo '<input type="submit" name="resetar_progresso_ficha" class="button button-secondary" value="Resetar Progresso" onclick="return confirm(\'Tem certeza que deseja resetar o progresso da ficha técnica?\');">';
     echo '</form>';
 
     // Teste individual
-    if (isset($_POST['sincronizar_sku_teste'])) {
+    if (isset($_POST['sincronizar_sku_teste']) && woo_importador_post_ok()) {
         $sku = sanitize_text_field($_POST['sku_ficha_teste'] ?? '');
         if (!empty($sku)) {
             woo_importador_testar_ficha_tecnica($sku);
@@ -393,7 +393,7 @@ function woo_importador_pagina_ficha_tecnica() {
 
     echo '<div class="card" style="max-width: 700px; padding: 20px; margin: 20px 0;">';
     echo '<h3>Testar um SKU específico</h3>';
-    echo '<form method="post">';
+    echo '<form method="post">'; woo_importador_nonce_field();
     echo '<table class="form-table">';
     echo '<tr>';
     echo '<th scope="row">SKU</th>';
@@ -463,7 +463,7 @@ function woo_importador_testar_ficha_tecnica($sku) {
         'Código agrupador' => get_post_meta($produto->ID, '_precode_codigo_agrupador', true),
         'Grade cor' => get_post_meta($produto->ID, '_precode_grade_x_nome', true),
         'Grade variação' => get_post_meta($produto->ID, '_precode_grade_y_nome', true),
-        'Imagem destacada' => has_post_thumbnail($produto->ID) ? '✅ Definida' : '— nenhuma',
+        'Imagem destacada' => has_post_thumbnail($produto->ID) ? 'Definida' : '— nenhuma',
         'Galeria' => count(array_filter(explode(',', get_post_meta($produto->ID, '_product_image_gallery', true)))) . ' imagem(ns)',
         'Categoria' => implode(', ', wp_list_pluck(get_the_terms($produto->ID, 'product_cat') ?: [], 'name')),
     ];
@@ -486,13 +486,13 @@ function woo_importador_pagina_fantasmas() {
     echo '<h1>Produtos Fantasmas (Sem SKU)</h1>';
     
     // Processar Exclusões Individuais ou em Lote
-    if (isset($_POST['excluir_fantasma']) && !empty($_POST['fantasma_id'])) {
+    if (isset($_POST['excluir_fantasma']) && !empty($_POST['fantasma_id']) && woo_importador_post_ok()) {
         $post_id = intval($_POST['fantasma_id']);
         wp_trash_post($post_id);
         echo '<div class="notice notice-success"><p>Produto ID ' . $post_id . ' enviado para a lixeira.</p></div>';
     }
     
-    if (isset($_POST['excluir_todos_fantasmas'])) {
+    if (isset($_POST['excluir_todos_fantasmas']) && woo_importador_post_ok()) {
         if (!empty($_POST['fantasmas_ids'])) {
             $ids = array_map('intval', explode(',', $_POST['fantasmas_ids']));
             $count = 0;
@@ -522,7 +522,7 @@ function woo_importador_pagina_fantasmas() {
         
         // Botão excluir todos
         $ids_string = implode(',', wp_list_pluck($fantasmas, 'ID'));
-        echo '<form method="post" style="margin-bottom: 20px;">';
+        echo '<form method="post" style="margin-bottom: 20px;">'; woo_importador_nonce_field();
         echo '<input type="hidden" name="fantasmas_ids" value="' . esc_attr($ids_string) . '">';
         echo '<input type="submit" name="excluir_todos_fantasmas" class="button button-primary" value="Enviar TODOS (' . count($fantasmas) . ') para a Lixeira" onclick="return confirm(\'Atenção! Todos estes produtos serão enviados para a lixeira. Deseja continuar?\');" style="background: #d63638; border-color: #c72c2e;">';
         echo '</form>';
@@ -538,6 +538,7 @@ function woo_importador_pagina_fantasmas() {
             echo '<td><strong><a href="' . esc_url($edit_url) . '" target="_blank">' . esc_html($f->post_title ?: '(Sem Título)') . '</a></strong></td>';
             echo '<td>
                     <form method="post" style="display:inline;">
+                        ' . woo_importador_nonce_html() . '
                         <input type="hidden" name="fantasma_id" value="' . $f->ID . '">
                         <input type="submit" name="excluir_fantasma" class="button button-small" value="Lixeira" onclick="return confirm(\'Enviar produto para lixeira?\');">
                     </form>
@@ -571,30 +572,6 @@ function woo_importador_pagina_fantasmas() {
         echo '<div class="notice notice-error"><p><strong>Erro de SQL (Duplicados):</strong> ' . esc_html($wpdb->last_error) . '</p></div>';
     }
 
-    // DEBUG ESPECÍFICO PARA O SKU 22816
-    $debug_sku = $wpdb->get_results("SELECT post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE meta_value LIKE '%22816%' AND meta_key = '_sku'");
-    echo '<div style="background:#000; color:#0f0; padding:10px; margin-top:20px; font-family:monospace;">';
-    echo '<strong>DEBUG LOG PARA SKU 22816:</strong><br>';
-    if (empty($debug_sku)) {
-        echo 'Nenhum registro encontrado na tabela postmeta para o valor 22816.<br>';
-    } else {
-        foreach ($debug_sku as $db) {
-            echo "Post ID: {$db->post_id} | Meta Key: {$db->meta_key} | Meta Value: '{$db->meta_value}' <br>";
-        }
-    }
-    
-    // Ver o status real desses posts
-    if (!empty($debug_sku)) {
-        $ids_debug = array_map(function($o){ return $o->post_id; }, $debug_sku);
-        $ids_str = implode(',', $ids_debug);
-        $status_debug = $wpdb->get_results("SELECT ID, post_status, post_type FROM {$wpdb->posts} WHERE ID IN ($ids_str)");
-        echo '<br><strong>STATUS DESSES IDs:</strong><br>';
-        foreach ($status_debug as $sd) {
-            echo "Post ID: {$sd->ID} | Type: {$sd->post_type} | Status: {$sd->post_status} <br>";
-        }
-    }
-    echo '</div>';
-
     if (empty($duplicados)) {
         echo '<div class="notice notice-success"><p>Excelente! Não há produtos com SKU duplicado na sua loja.</p></div>';
     } else {
@@ -613,12 +590,12 @@ function woo_importador_pagina_fantasmas() {
                 $p = get_post($pid);
                 if ($p) {
                     $edit_url = get_edit_post_link($pid);
-                    $tem_imagem = has_post_thumbnail($pid) ? '✅ Com Imagem' : '❌ Sem Imagem';
+                    $tem_imagem = has_post_thumbnail($pid) ? 'Com Imagem' : '❌ Sem Imagem';
                     echo '<div style="margin-bottom:8px; padding:8px; background:#fff; border:1px solid #ccc;">';
                     echo '<strong><a href="' . esc_url($edit_url) . '" target="_blank">' . esc_html($p->post_title ?: '(Sem Título)') . '</a></strong> <span style="color:#666;">(ID: ' . $pid . ')</span> | ' . $tem_imagem;
                     
                     // Botão Lixeira
-                    echo '<form method="post" style="display:inline; float:right;">';
+                    echo '<form method="post" style="display:inline; float:right;">'; woo_importador_nonce_field();
                     echo '<input type="hidden" name="fantasma_id" value="' . $pid . '">';
                     echo '<input type="submit" name="excluir_fantasma" class="button button-small" value="Lixeira" onclick="return confirm(\'Enviar produto ' . $pid . ' para lixeira?\');">';
                     echo '</form>';

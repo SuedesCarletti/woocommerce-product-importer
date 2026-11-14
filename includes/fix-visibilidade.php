@@ -6,7 +6,7 @@ if (!defined('ABSPATH')) {
 function woo_importador_forcar_visibilidade() {
     echo '<div class="wrap"><h1>Forçar Correção de Visibilidade (Busca)</h1>';
     
-    if (isset($_POST['forcar_visibilidade'])) {
+    if (isset($_POST['forcar_visibilidade']) && woo_importador_post_ok()) {
         // Destravar flags do WooCommerce
         delete_option('woocommerce_attribute_lookup_regeneration_in_progress');
         delete_option('woocommerce_update_product_lookup_tables_is_running');
@@ -55,7 +55,7 @@ function woo_importador_forcar_visibilidade() {
     }
     
     echo '<p>Se seus produtos têm estoque mas não aparecem na pesquisa ou categorias, o sistema de indexação do WooCommerce pode ter travado. Cole os SKUs abaixo (separados por vírgula) para destravar e forçar o re-cadastramento invisível deles.</p>';
-    echo '<form method="post">';
+    echo '<form method="post">'; woo_importador_nonce_field();
     echo '<textarea name="skus_corrigir" rows="5" style="width:100%; max-width:600px;" placeholder="Exemplo: 24479, 23214, 23212"></textarea><br><br>';
     echo '<input type="submit" name="forcar_visibilidade" class="button button-primary" value="Forçar Correção de Visibilidade">';
     echo '</form>';
